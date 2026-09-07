@@ -1,20 +1,20 @@
 import { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Home, MapPin, Calendar, Bell, User as UserIcon, LogOut, Menu, Tractor, UserCog, LineChart, FileText, Activity, CreditCard, HelpCircle, MessageSquare, Settings, Leaf } from 'lucide-react';
-import { Role } from '../../types';
-import { User } from 'firebase/auth';
-import { signOut } from '../../lib/firebase';
+import { Role, User } from '../../types';
+import { supabase } from '../../lib/supabase';
 
 interface Props {
   children: ReactNode;
   role: Role;
   setRole: (role: Role) => void;
   user: User | null;
+  setUser: (user: User | null) => void;
   language: 'en' | 'hi';
   setLanguage: (lang: 'en' | 'hi') => void;
 }
 
-export default function Layout({ children, role, setRole, user, language, setLanguage }: Props) {
+export default function Layout({ children, role, setRole, user, setUser, language, setLanguage }: Props) {
   const navigate = useNavigate();
 
   const farmerNav: Array<{path: string, label: string, icon: any, badge?: number, hiddenDesktop?: boolean}> = [
@@ -82,7 +82,7 @@ export default function Layout({ children, role, setRole, user, language, setLan
               <button className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-slate-500 hover:bg-[#F4F6F4] hover:text-[#1E3A8A] transition-all">
                 <HelpCircle className="w-5 h-5 text-slate-400" /> Help & Support
               </button>
-              <button onClick={() => { signOut(); setRole(null); navigate('/'); }} className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all">
+              <button onClick={async () => { await supabase.auth.signOut(); setUser(null); setRole(null); navigate('/'); }} className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all">
                 <LogOut className="w-5 h-5" /> Logout
               </button>
             </div>

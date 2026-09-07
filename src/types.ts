@@ -23,4 +23,11 @@ export interface Booking {
   queuePosition: number;
 }
 
+export interface User {
+  id: string;
+  name: string;
+  email?: string;
+  photoURL?: string;
+}
+
 export type Role = 'farmer' | 'supervisor' | 'gov' | null;

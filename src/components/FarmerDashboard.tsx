@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { MapPin, Calendar, CreditCard, Activity, Bell, FileText, ChevronRight, Info, Sun, Tractor, MessageSquare, HelpCircle, User as UserIcon } from 'lucide-react';
-import { Center, Booking } from '../types';
-import { auth, db } from '../lib/firebase';
-import { collection, query, where, addDoc, serverTimestamp, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { Center, Booking, User } from '../types';
 
 // Subviews
 import SlotBooking from './farmer/SlotBooking';
@@ -16,9 +14,10 @@ import HistoryView from './farmer/HistoryView';
 
 interface Props {
   language: 'en' | 'hi';
+  user?: User | null;
 }
 
-function Overview({ language, activeBooking }: { language: string, activeBooking: Booking | null }) {
+function Overview({ language, activeBooking, user }: { language: string, activeBooking: Booking | null, user?: User | null }) {
   const navigate = useNavigate();
 
   return (
@@ -26,7 +25,7 @@ function Overview({ language, activeBooking }: { language: string, activeBooking
       
       {/* Mobile Header Greeting */}
       <div className="md:hidden">
-         <h2 className="text-2xl font-bold text-[#1E3A8A] leading-tight">Good Morning,<br/>{auth.currentUser?.displayName || 'Ramesh Yadav'}</h2>
+         <h2 className="text-2xl font-bold text-[#1E3A8A] leading-tight">Good Morning,<br/>{user?.name || 'Ramesh Yadav'}</h2>
          <p className="text-sm text-[#0F7A3B] font-bold mt-1">Better Markets. Brighter Tomorrows.</p>
       </div>
 
@@ -197,7 +196,7 @@ function Overview({ language, activeBooking }: { language: string, activeBooking
   );
 }
 
-export default function FarmerDashboard({ language }: Props) {
+export default function FarmerDashboard({ language, user }: Props) {
   const [centers, setCenters] = useState<Center[]>([]);
   const [activeBooking, setActiveBooking] = useState<Booking | null>(null);
 
@@ -206,46 +205,31 @@ export default function FarmerDashboard({ language }: Props) {
       .then(res => res.json())
       .then(data => setCenters(data));
       
-    if (!auth.currentUser) return;
-
-    const q = query(
-      collection(db, 'bookings'), 
-      where('userId', '==', auth.currentUser.uid),
-      orderBy('createdAt', 'desc'),
-      limit(1)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      if (!snapshot.empty) {
-        const doc = snapshot.docs[0];
-        const data = doc.data();
-        setActiveBooking({ id: doc.id, ...data } as Booking);
-      }
-    });
-
-    return () => unsubscribe();
+    // Mocking an active booking instead of fetching from Firestore
+    // For demo purposes, we will leave it empty initially or load from localStorage
+    const savedBooking = localStorage.getItem('mockBooking');
+    if (savedBooking) {
+      setActiveBooking(JSON.parse(savedBooking));
+    }
   }, []);
 
   const handleBook = async (bookingData: any) => {
-    if (!auth.currentUser) return;
-    try {
-      await addDoc(collection(db, 'bookings'), {
-        ...bookingData,
-        userId: auth.currentUser.uid,
-        farmerName: auth.currentUser.displayName || auth.currentUser.email,
-        status: "Registered",
-        token: `A${Math.floor(100 + Math.random() * 900)}`,
-        queuePosition: Math.floor(Math.random() * 20) + 1,
-        createdAt: serverTimestamp()
-      });
-    } catch(err) {
-      console.error(err);
-    }
+    const newBooking: Booking = {
+      id: `BK${Math.floor(Math.random() * 10000)}`,
+      ...bookingData,
+      farmerName: user?.name || 'Ramesh Yadav',
+      status: "Registered",
+      token: `A${Math.floor(100 + Math.random() * 900)}`,
+      queuePosition: Math.floor(Math.random() * 20) + 1,
+    };
+    
+    setActiveBooking(newBooking);
+    localStorage.setItem('mockBooking', JSON.stringify(newBooking));
   };
 
   return (
     <Routes>
-      <Route path="/" element={<Overview language={language} activeBooking={activeBooking} />} />
+      <Route path="/" element={<Overview language={language} activeBooking={activeBooking} user={user} />} />
       <Route path="/schedule" element={<SlotBooking centers={centers} onBook={handleBook} language={language} />} />
       <Route path="/centers" element={<NearbyCenters centers={centers} />} />
       <Route path="/track" element={<StatusTracking booking={activeBooking} language={language} />} />

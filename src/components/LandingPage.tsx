@@ -1,17 +1,25 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Leaf, ChevronRight, ShieldCheck } from 'lucide-react';
-import { signInWithGoogle, auth } from '../lib/firebase';
-import { Role } from '../types';
+import { Role, User } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface Props {
   language: 'en' | 'hi';
   setRole: (role: Role) => void;
+  setUser: (user: User | null) => void;
 }
 
-export default function LandingPage({ language, setRole }: Props) {
+export default function LandingPage({ language, setRole, setUser }: Props) {
   const [step, setStep] = useState(1);
-  const user = auth.currentUser;
+  const [isLogin, setIsLogin] = useState(true);
+  
+  // Form State
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const languages = [
     { code: 'en', label: 'English', native: 'English' },
@@ -22,12 +30,41 @@ export default function LandingPage({ language, setRole }: Props) {
     { code: 'ta', label: 'Tamil', native: 'தமிழ்' },
   ];
 
-  const handleLogin = async () => {
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
     try {
-      await signInWithGoogle();
-      setRole('farmer'); // Default routing for demo
-    } catch (err) {
-      console.error(err);
+      if (isLogin) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        if (signInError) throw signInError;
+      } else {
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              name: name
+            }
+          }
+        });
+        if (signUpError) throw signUpError;
+
+        // If sign up is successful but no session is returned, email confirmation is required.
+        if (data.user && !data.session) {
+          setError('Registration successful! Please check your email to confirm your account.');
+          setLoading(false);
+          return;
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || 'Authentication failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -139,8 +176,12 @@ export default function LandingPage({ language, setRole }: Props) {
                 <div className="w-16 h-16 bg-[#0F7A3B] rounded-2xl flex items-center justify-center shadow-xl shadow-[#0F7A3B]/30 mx-auto mb-6">
                   <Leaf className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-[#1E3A8A] mb-2">Login to Kishan Mitra</h3>
-                <p className="text-sm text-slate-500 font-medium">Welcome Back!<br/>Sign in to continue</p>
+                <h3 className="text-2xl font-bold text-[#1E3A8A] mb-2">
+                  {isLogin ? 'Login to Kishan Mitra' : 'Create an Account'}
+                </h3>
+                <p className="text-sm text-slate-500 font-medium">
+                  {isLogin ? 'Welcome Back! Sign in to continue' : 'Register to start smart procurement'}
+                </p>
               </div>
 
               <div className="flex bg-[#F4F6F4] rounded-xl p-1.5 mb-8">
@@ -149,44 +190,79 @@ export default function LandingPage({ language, setRole }: Props) {
                 <button className="flex-1 text-slate-500 font-medium hover:text-[#1E3A8A] py-2.5 rounded-lg text-sm transition-colors">Admin</button>
               </div>
 
-              <div className="space-y-5">
+              <form onSubmit={handleAuth} className="space-y-5">
+                {!isLogin && (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-2">Full Name</label>
+                    <div className="flex border-2 border-slate-100 rounded-xl overflow-hidden focus-within:border-[#0F7A3B] transition-colors">
+                      <input 
+                        type="text" 
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Enter your name" 
+                        className="flex-1 px-4 py-3 outline-none text-[#1E3A8A] font-bold placeholder:font-normal placeholder:text-slate-400" 
+                        required={!isLogin}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-2">Mobile Number</label>
+                  <label className="block text-xs font-bold text-slate-500 mb-2">Email Address</label>
                   <div className="flex border-2 border-slate-100 rounded-xl overflow-hidden focus-within:border-[#0F7A3B] transition-colors">
-                    <div className="bg-slate-50 px-4 py-3 border-r border-slate-100 text-[#1E3A8A] font-bold">+91</div>
-                    <input type="tel" placeholder="Enter mobile number" className="flex-1 px-4 py-3 outline-none text-[#1E3A8A] font-bold placeholder:font-normal placeholder:text-slate-400" />
+                    <input 
+                      type="email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter email address" 
+                      className="flex-1 px-4 py-3 outline-none text-[#1E3A8A] font-bold placeholder:font-normal placeholder:text-slate-400" 
+                      required
+                    />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-500 mb-2">Password</label>
                   <div className="flex border-2 border-slate-100 rounded-xl overflow-hidden focus-within:border-[#0F7A3B] transition-colors">
-                    <input type="password" placeholder="Enter password" className="flex-1 px-4 py-3 outline-none text-[#1E3A8A] font-bold placeholder:font-normal placeholder:text-slate-400" />
+                    <input 
+                      type="password" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter password" 
+                      className="flex-1 px-4 py-3 outline-none text-[#1E3A8A] font-bold placeholder:font-normal placeholder:text-slate-400" 
+                      required
+                    />
                   </div>
-                  <div className="text-right mt-2">
-                    <a href="#" className="text-xs font-bold text-[#0F7A3B] hover:underline">Forgot Password?</a>
-                  </div>
+                  {isLogin && (
+                    <div className="text-right mt-2">
+                      <a href="#" className="text-xs font-bold text-[#0F7A3B] hover:underline">Forgot Password?</a>
+                    </div>
+                  )}
                 </div>
 
-                <button className="w-full bg-[#0F7A3B] hover:bg-[#0F7A3B]/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-[#0F7A3B]/30 transition-all active:scale-95">
-                  Login
-                </button>
+                {error && (
+                  <p className="text-red-500 text-xs font-bold">{error}</p>
+                )}
 
-                <div className="relative flex items-center py-4">
-                  <div className="flex-grow border-t border-slate-100"></div>
-                  <span className="flex-shrink-0 mx-4 text-xs font-bold text-slate-400">OR</span>
-                  <div className="flex-grow border-t border-slate-100"></div>
-                </div>
-
-                <button onClick={handleLogin} className="w-full bg-white border-2 border-slate-100 hover:border-[#0F7A3B] text-[#1E3A8A] font-bold py-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-3">
-                  <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
-                  Continue with Google
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full bg-[#0F7A3B] hover:bg-[#0F7A3B]/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-[#0F7A3B]/30 transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {loading ? 'Processing...' : (isLogin ? 'Login' : 'Register')}
                 </button>
 
                 <p className="text-center text-sm font-medium text-slate-500 mt-6">
-                  Don't have an account? <a href="#" className="text-[#0F7A3B] font-bold hover:underline">Register</a>
+                  {isLogin ? "Don't have an account? " : "Already have an account? "}
+                  <button 
+                    type="button"
+                    onClick={() => setIsLogin(!isLogin)} 
+                    className="text-[#0F7A3B] font-bold hover:underline"
+                  >
+                    {isLogin ? 'Register' : 'Login'}
+                  </button>
                 </p>
-              </div>
+              </form>
             </motion.div>
           )}
 

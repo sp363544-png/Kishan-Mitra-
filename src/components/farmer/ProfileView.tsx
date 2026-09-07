@@ -1,6 +1,5 @@
 import { User, Map, CreditCard, Globe, HelpCircle, MessageSquare, Info, ChevronRight, LogOut } from 'lucide-react';
-import { auth } from '../../lib/firebase';
-import { signOut } from 'firebase/auth';
+import { supabase } from '../../lib/supabase';
 
 export default function ProfileView() {
   const menuItems = [
@@ -23,8 +22,8 @@ export default function ProfileView() {
       </div>
 
       <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 text-center">
-         <img src={auth.currentUser?.photoURL || `https://ui-avatars.com/api/?name=${auth.currentUser?.email}&background=0F7A3B&color=fff`} alt="Avatar" className="w-24 h-24 rounded-full border-4 border-slate-50 shadow-md mx-auto mb-4" />
-         <h3 className="text-xl font-bold text-[#1E3A8A] mb-1">{auth.currentUser?.displayName || 'Ramesh Yadav'}</h3>
+         <img src={`https://ui-avatars.com/api/?name=Ramesh+Yadav&background=0F7A3B&color=fff`} alt="Avatar" className="w-24 h-24 rounded-full border-4 border-slate-50 shadow-md mx-auto mb-4" />
+         <h3 className="text-xl font-bold text-[#1E3A8A] mb-1">Ramesh Yadav</h3>
          <p className="text-sm font-medium text-slate-500">Farmer ID: KM123456</p>
       </div>
 
@@ -44,7 +43,7 @@ export default function ProfileView() {
            </div>
          ))}
          
-         <div onClick={() => signOut(auth)} className="flex items-center justify-between p-5 hover:bg-red-50 cursor-pointer transition-colors group">
+         <div onClick={async () => { await supabase.auth.signOut(); window.location.href = '/'; }} className="flex items-center justify-between p-5 hover:bg-red-50 cursor-pointer transition-colors group">
             <div className="flex items-center gap-4">
                <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center group-hover:bg-red-100 transition-colors">
                   <LogOut className="w-5 h-5 text-red-500" />
