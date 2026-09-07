@@ -1,0 +1,6 @@
+{
+  "name": "Kishan Mitra",
+  "description": "Smart procurement tracking, queue management, and government dashboard to eliminate waiting times and distress selling at mandis.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
