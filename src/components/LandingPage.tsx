@@ -82,7 +82,7 @@ export default function LandingPage({ language, setRole, setUser }: Props) {
               <div className="w-12 h-12 bg-[#0F7A3B] rounded-xl flex items-center justify-center shadow-lg shadow-[#0F7A3B]/30">
                 <Leaf className="w-7 h-7 text-white" />
               </div>
-              <h1 className="text-3xl font-bold text-[#1E3A8A] tracking-tight">Kishan Mitra</h1>
+              <h1 className="text-3xl font-bold text-[#1E3A8A] tracking-tight">Krishi-Mitra</h1>
            </div>
 
            <h2 className="text-5xl font-extrabold text-[#1E3A8A] leading-[1.1] mb-6">
@@ -133,7 +133,7 @@ export default function LandingPage({ language, setRole, setUser }: Props) {
                 <div className="w-10 h-10 bg-[#0F7A3B] rounded-xl flex items-center justify-center shadow-lg">
                   <Leaf className="w-6 h-6 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold text-[#1E3A8A]">Kishan Mitra</h1>
+                <h1 className="text-2xl font-bold text-[#1E3A8A]">Krishi-Mitra</h1>
               </div>
 
               <div className="text-center mb-8">
@@ -177,7 +177,7 @@ export default function LandingPage({ language, setRole, setUser }: Props) {
                   <Leaf className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-[#1E3A8A] mb-2">
-                  {isLogin ? 'Login to Kishan Mitra' : 'Create an Account'}
+                  {isLogin ? 'Login to Krishi-Mitra' : 'Create an Account'}
                 </h3>
                 <p className="text-sm text-slate-500 font-medium">
                   {isLogin ? 'Welcome Back! Sign in to continue' : 'Register to start smart procurement'}

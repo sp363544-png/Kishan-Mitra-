@@ -54,7 +54,7 @@ export default function Layout({ children, role, setRole, user, setUser, languag
               <Leaf className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-[#1E3A8A] leading-tight tracking-tight">Kishan Mitra</h1>
+              <h1 className="text-xl font-bold text-[#1E3A8A] leading-tight tracking-tight">Krishi-Mitra</h1>
               <p className="text-[10px] text-slate-500 font-medium tracking-wide">Smart Procurement.</p>
             </div>
           </div>
@@ -99,7 +99,7 @@ export default function Layout({ children, role, setRole, user, setUser, languag
             <div className="w-8 h-8 bg-[#0F7A3B] rounded-lg flex items-center justify-center">
               <Leaf className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-lg font-bold text-[#1E3A8A] tracking-tight">Kishan Mitra</h1>
+            <h1 className="text-lg font-bold text-[#1E3A8A] tracking-tight">Krishi-Mitra</h1>
           </div>
           <div className="flex items-center gap-4">
             <Bell className="w-5 h-5 text-slate-600" />

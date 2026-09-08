@@ -9,7 +9,7 @@ export default function ProfileView() {
     { icon: Globe, label: 'Language', sub: 'English' },
     { icon: HelpCircle, label: 'Help & Support' },
     { icon: MessageSquare, label: 'App Feedback' },
-    { icon: Info, label: 'About Kishan Mitra' },
+    { icon: Info, label: 'About Krishi-Mitra' },
   ];
 
   return (
